@@ -51,11 +51,13 @@ export default class Watcher {
   ) {
     this.vm = vm
     if (isRenderWatcher) {
-      vm._watcher = this
+      vm._watcher = this //* 如果当前 watcher 是渲染 watcher的话，就把当前 watcher赋值在vm实例的 _watcher属性上
     }
-    vm._watchers.push(this)
+    //* _watchers存放所有的watcher
+    vm._watchers.push(this) //* 将当前 watcher push到 _watchers 数组中去
     // options
     if (options) {
+      //* 这些选项和渲染 watcher 无关 和其他种类的 watcher 有关
       this.deep = !!options.deep
       this.user = !!options.user
       this.lazy = !!options.lazy

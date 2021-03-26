@@ -52,15 +52,18 @@ export default class Dep {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
+//* Dep.target 用来存放目前正在使用的 Watcher
+//* 全局唯一 并且一次只能有一个 watcher 被使用 
 Dep.target = null
 const targetStack = []
-
+//* 入栈并将当前 watcher 赋值给 Dep.target
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
   Dep.target = target
 }
 
 export function popTarget () {
+  //* 出栈操作
   targetStack.pop()
   Dep.target = targetStack[targetStack.length - 1]
 }

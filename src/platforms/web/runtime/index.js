@@ -20,6 +20,8 @@ import platformDirectives from './directives/index'
 import platformComponents from './components/index'
 
 // install platform specific utils
+//* 判断是否是关键属性（表单元素的input / checked / selected / muted）
+//* 如果是这些属性，设置 el.props属性（ 属性不设置到 标签上）
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
 Vue.config.isReservedAttr = isReservedAttr
@@ -27,10 +29,13 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+//* 注册全局的 指令 和 组件
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// 判断是否含有全局变量window来判断是否是浏览器环境
+//* inBrowser = typeof window !== 'undefined' 
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
@@ -41,7 +46,7 @@ Vue.prototype.$mount = function (
   el = el && inBrowser ? query(el) : undefined
   return mountComponent(this, el, hydrating)
 }
-
+//* devtools 开发者工具相关
 // devtools global hook
 /* istanbul ignore next */
 if (inBrowser) {

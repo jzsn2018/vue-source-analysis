@@ -29,6 +29,9 @@ export function toggleObserving (value: boolean) {
 }
 
 /**
+ * Observer类会附属在每一个observe对象上。一旦附属上，observer实例就会转换目标对象的每一个属性
+ * 变成 getter 和 setter；其目的就是为了收集依赖和派发更新
+ * 
  * Observer class that is attached to each observed
  * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
@@ -37,25 +40,34 @@ export function toggleObserving (value: boolean) {
 export class Observer {
   value: any;
   dep: Dep;
-  vmCount: number; // number of vms that have this object as root $data
+  //* 实例（含有根 $data 属性的对象 ）计数器
+  vmCount: number; // number of vms that have this object as root $data 
 
   constructor (value: any) {
     this.value = value
-    this.dep = new Dep()
+    this.dep = new Dep() //* dep 属性 是 一个 Dep 实例
     this.vmCount = 0
-    def(value, '__ob__', this)
+    //! 将Observer实例 挂载到观察对象 __ob__
+    def(value, '__ob__', this) //! 这里设置了  enumerable 可枚举 false，阻止 __ob__ 属性被 value 属性循环枚举出来
+    //* 数组响应式 处理
     if (Array.isArray(value)) {
+      //* arrayMethods 中，里面已经对 array 中的会改变原数组的方法 进行修补了
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
+      //* 为数组的每一项添加 observe(value[i])
+      //* observe函数里面有判断的 Array.isArray(value) || isPlainObject(value)才会进行添加 Observer实例
       this.observeArray(value)
     } else {
+      //* 对象数据类型 遍历每一个属性 转换成 setter / getter
       this.walk(value)
     }
   }
 
+  //* 遍历所有的属性，将其转换成getter 和 setter
+  //* walk方法只有当 value 是对象的时候才会被 调用
   /**
    * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
@@ -64,7 +76,7 @@ export class Observer {
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i])
+      defineReactive(obj, keys[i]) //* 添加依赖 dep
     }
   }
 
@@ -72,6 +84,7 @@ export class Observer {
    * Observe a list of Array items.
    */
   observeArray (items: Array<any>) {
+    //* 遍历数组中的成员，添加响应式（items[i] 需要是 object 否则在函数中会被 return 出来）
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
     }
@@ -108,22 +121,27 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  //* 传递的value数据不是 对象 以及 value 是 VNode虚拟DOM的时候，就 不需要进行响应式数据处理
   if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
+  //* 缓存处理 存在 __ob__ 属性，以及 __ob__ 属性是否是 Observer 的实例
+  //* __ob__ 是在 Observer类里面定义的
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__
+    ob = value.__ob__ //* 返回已经存在的ob实例
   } else if (
+    //* 判断当前传递的value是否可以被observer
     shouldObserve &&
     !isServerRendering() &&
-    (Array.isArray(value) || isPlainObject(value)) &&
-    Object.isExtensible(value) &&
-    !value._isVue
+    (Array.isArray(value) || isPlainObject(value)) && //* 判断value是否数组或者普通的对象
+    Object.isExtensible(value) && //* 判断 value 是否可以扩展， 不能扩展的话，返回的ob就是undefined
+    !value._isVue //* 不对 vue实例 进行 observer
   ) {
-    ob = new Observer(value)
+    ob = new Observer(value) //* 创建 observer
   }
   if (asRootData && ob) {
+    //* 处理根数据的时候，给计数 vmCount++
     ob.vmCount++
   }
   return ob
@@ -132,37 +150,51 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 /**
  * Define a reactive property on an Object.
  */
+//* 为一个对象定义响应式属性
 export function defineReactive (
   obj: Object,
   key: string,
   val: any,
   customSetter?: ?Function,
-  shallow?: boolean
+  shallow?: boolean //* 浅的 true 的时候，只转换一层
 ) {
+  //* 创建依赖对象实例
   const dep = new Dep()
-
+  //* 获取传递的obj对象的key属性的属性描述符
   const property = Object.getOwnPropertyDescriptor(obj, key)
+  //* 当前属性 不可配置 的时候， 直接返回 
   if (property && property.configurable === false) {
     return
   }
 
+  //* 提供预定义的 getter 和 setter；
+  //* 如果传递的属性本身就是定义了 getter 和 setter的时候，会先备份一下getter 和 setter，
+  //* 在重写这个属性的getter和setter的时候会在特定时机使用
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
+  //* 获取当前 属性key 对应的 value 值
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
-
+  //* 判断是否 递归 观察子对象，并将子对象的属性都转换成 getter 和 setter ， 返回子观察对象
   let childOb = !shallow && observe(val)
+  //* 将属性转换 成 getter 和 setter
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      //* 当前属性预定义了getter存在，那么属性的value就等于getter执行之后的结果
+      //* 否则直接等于 obj[key]
       const value = getter ? getter.call(obj) : val
+      //* 如果存在当前依赖目标，即 Watcher对象 ，则建立依赖
+      //! 在 Watcher中赋值的 pushTarget
       if (Dep.target) {
         dep.depend()
+        //* 如果子观察目标存在，建立子对象的依赖关系
         if (childOb) {
           childOb.dep.depend()
+          //* 如果属性是对象的时候，做特殊处理
           if (Array.isArray(value)) {
             dependArray(value)
           }

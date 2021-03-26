@@ -14,6 +14,7 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
+  //* 将inject属性遍历出来，添加到vm上（添加响应式属性）
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
     toggleObserving(false)

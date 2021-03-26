@@ -1,0 +1,35 @@
+<!--
+ * @Date: 2021-03-24 17:55:36
+ * @LastEditors: Timothy
+ * @LastEditTime: 2021-03-26 15:24:43
+ * @Description: debug vue 初始化
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>debug vue 初始化</title>
+</head>
+<body>
+  <script src="../dist/vue.js"></script>
+
+  <div id="app">
+    <h3>{{msg}}</h3>
+    <hr>
+    <h3>{{msg}}</h3>
+    <h3>{{count}}</h3>
+  </div>
+  <script>
+    new Vue({
+      el:"#app",
+      data:{
+        msg:"hello vue",
+        count:100
+      }
+    })
+
+  </script>
+</body>
+</html>

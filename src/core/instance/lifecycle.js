@@ -38,7 +38,7 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    parent.$children.push(vm)
+    parent.$children.push(vm) //* 将当前vue实例push到父组件的$children数组中去
   }
 
   vm.$parent = parent
@@ -194,13 +194,16 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  //! Watcher
+  //* updateComponent 更新 DOM
   new Watcher(vm, updateComponent, noop, {
+    // 触发 beforeUpdate 
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }
     }
-  }, true /* isRenderWatcher */)
+  }, true /* 代表这是渲染 Watcher isRenderWatcher */)
   hydrating = false
 
   // manually mounted instance, call mounted on self

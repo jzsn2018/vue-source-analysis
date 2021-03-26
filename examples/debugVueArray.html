@@ -1,0 +1,38 @@
+<!--
+ * @Date: 2021-03-24 17:55:36
+ * @LastEditors: Timothy
+ * @LastEditTime: 2021-03-26 17:00:55
+ * @Description: debug vue 初始化
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>debug vue 初始化</title>
+</head>
+
+<body>
+  <script src="../dist/vue.js"></script>
+
+  <div id="app">
+    <h3>{{arr}}</h3>
+    <hr>
+    <h3>{{arr}}</h3>
+  </div>
+  <script>
+    const vm = new Vue({
+      el: "#app",
+      data: {
+        arr: [2, 3, 5]
+      }
+    })
+    // vm.arr.push(8);
+    // vm.arr[0] = 100;
+    // vm.arr.length = 0;
+  </script>
+</body>
+
+</html>

@@ -13,7 +13,7 @@ const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
-
+//* 重写$mount方法
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,

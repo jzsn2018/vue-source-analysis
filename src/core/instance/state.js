@@ -48,8 +48,11 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.props) initProps(vm, opts.props) //* 将props成员，变成响应式数据，并注入vue实例
+  //* 将method成员，注入到vue实例
+  //* 不建议以_和$开头命名的函数成员
+  //* 不能和props中的属性名冲突
+  if (opts.methods) initMethods(vm, opts.methods) 
   if (opts.data) {
     initData(vm)
   } else {
@@ -103,7 +106,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
     if (!(key in vm)) {
-      proxy(vm, `_props`, key)
+      proxy(vm, `_props`, key) //* 将props中的每个属性 挂载到 vm 实例上的 _props 属性上
     }
   }
   toggleObserving(true)
@@ -111,6 +114,7 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  //* data: 函数 | 对象 形式
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
@@ -143,8 +147,10 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(key)) {
-      proxy(vm, `_data`, key)
+    //* 上面两个 if 判断data中的属性是否和 method 和 prop 中的属性重名；
+    //* 因为data prop method 上面的属性都要挂载到 vue实例上面去
+    } else if (!isReserved(key) /* Check if a string starts with $ or _ */) {
+      proxy(vm, `_data`, key) //* 将 data 中的每个属性 挂载到 vm 实例上的 _data 属性上
     }
   }
   // observe data
@@ -155,6 +161,7 @@ export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
   try {
+    //* 绑定 this, 并且把当前的 vue实例传递到 data函数中去
     return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)
@@ -270,12 +277,14 @@ function initMethods (vm: Component, methods: Object) {
           vm
         )
       }
+      //! props 和 methods不能有同名属性存在
       if (props && hasOwn(props, key)) {
         warn(
           `Method "${key}" has already been defined as a prop.`,
           vm
         )
       }
+      //! 不建议方法名以 _ 和 $ 开头
       if ((key in vm) && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
@@ -283,7 +292,7 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
-    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
+    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm) //* 通过bind重新指定this
   }
 }
 

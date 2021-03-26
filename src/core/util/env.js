@@ -1,6 +1,7 @@
 /* @flow */
 
 // can we use __proto__?
+//* 判断当前浏览器 是否可以 使用 __proto__ 属性
 export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
