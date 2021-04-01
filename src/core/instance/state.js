@@ -59,6 +59,7 @@ export function initState (vm: Component) {
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
+  //* 用户传递了 watch配置项 并且 这个 对象的 watch 不是原生的 watch (FireFox 浏览器Object.prototype上面有watch属性)
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
@@ -295,10 +296,12 @@ function initMethods (vm: Component, methods: Object) {
     vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm) //* 通过bind重新指定this
   }
 }
-
+//* watch就是vue实例化传递的 water对象
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
-    const handler = watch[key]
+    //* 遍历 watch 对象中的每一项(就是我们人为定义的要 侦听的项)
+    const handler = watch[key] //* 三种结构；一是对象(包含handler的对象)；二是函数；三是数组
+    //* 当 用户watcher 的 handler 是数组的时候，会循环触发传递的回调函数
     if (Array.isArray(handler)) {
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
@@ -310,15 +313,17 @@ function initWatch (vm: Component, watch: Object) {
 }
 
 function createWatcher (
-  vm: Component,
-  expOrFn: string | Function,
-  handler: any,
-  options?: Object
+  vm: Component, //* vue实例
+  expOrFn: string | Function,//* 字符串或者表达式
+  handler: any, //* 处理函数
+  options?: Object //* deep immediate
 ) {
+  //* 如果是对象的话
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
   }
+  //* 如果是字符串，就会去 vm 上面找对应的处理函数 method中定义的函数
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
@@ -350,28 +355,29 @@ export function stateMixin (Vue: Class<Component>) {
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
-
+  //! vm.$watch 源码定义
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
     options?: Object
   ): Function {
-    const vm: Component = this
+    const vm: Component = this //* 获取当前vue实例
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
-    options.user = true
+    options.user = true //* 定义为 用户watcher 标识
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
       try {
-        cb.call(vm, watcher.value)
+        cb.call(vm, watcher.value) //* 如果传递了 immediate为true的话，直接执行。(改变 this )
       } catch (error) {
         handleError(error, vm, `callback for immediate watcher "${watcher.expression}"`)
       }
     }
+    //! 返回取消 watcher的函数句柄
     return function unwatchFn () {
-      watcher.teardown()
+      watcher.teardown() //* 移除监听
     }
   }
 }

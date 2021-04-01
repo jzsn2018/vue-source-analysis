@@ -39,7 +39,7 @@ methodsToPatch.forEach(function (method) {
         inserted = args.slice(2) // * splice方法的第三个参数是替换元素，也是新增的元素
         break
     }
-    if (inserted) ob.observeArray(inserted) //* 将新增的元素转换成 getter 和 setter
+    if (inserted) ob.observeArray(inserted) //* 将新增的元素（ 可能会新增 object 对象）转换成 getter 和 setter,
     // notify change
     ob.dep.notify()
     return result

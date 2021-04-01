@@ -1,0 +1,51 @@
+<!--
+ * @Date: 2021-04-01 11:10:39
+ * @LastEditors: Timothy
+ * @LastEditTime: 2021-04-01 11:16:11
+ * @Description: 三种watcher
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>watch</title>
+</head>
+
+<body>
+  <script src="../dist/vue.js"></script>
+  <div id="app">
+    <p>{{username}}</p>
+
+  </div>
+  <script>
+    const vm = new Vue({
+      el: "#app",
+      data: {
+        user: {
+          firstName: "John",
+          lastName: "Smith",
+        }
+      },
+      computed: {
+        username() {
+          return this.user.firstName + " " + this.user.lastName;
+        }
+      },
+      watch: {
+        user: {
+          handler(newUser, oldUser) {
+            console.log("🚀 ~ file: watch.html ~ line 40 ~ handler ~ newUser,oldUser", newUser, oldUser)
+          },
+          immediate: true,
+          deep: true
+        }
+      }
+    })
+
+  </script>
+</body>
+
+</html>

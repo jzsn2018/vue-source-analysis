@@ -33,10 +33,12 @@ export default class Dep {
       Dep.target.addDep(this)
     }
   }
-
+  //* 数据更新的时候，发布通知
   notify () {
-    // stabilize the subscriber list first
-    const subs = this.subs.slice()
+    // stabilize the subscriber list first 稳定订阅者列表
+    //* 拷贝一份，这里是浅拷贝
+    //* sub里面存放着 watcher
+    const subs = this.subs.slice() 
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async
       // we need to sort them now to make sure they fire in correct

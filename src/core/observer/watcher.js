@@ -29,8 +29,8 @@ export default class Watcher {
   cb: Function;
   id: number;
   deep: boolean;
-  user: boolean;
-  lazy: boolean;
+  user: boolean; //* 用户监听 watcher 
+  lazy: boolean; //* 计算属性 watcher 
   sync: boolean;
   dirty: boolean;
   active: boolean;
@@ -59,16 +59,16 @@ export default class Watcher {
     if (options) {
       //* 这些选项和渲染 watcher 无关 和其他种类的 watcher 有关
       this.deep = !!options.deep
-      this.user = !!options.user
+      this.user = !!options.user //* 初始化 user属性
       this.lazy = !!options.lazy
       this.sync = !!options.sync
       this.before = options.before
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
-    this.cb = cb
-    this.id = ++uid // uid for batching
-    this.active = true
+    this.cb = cb;//* 回调函数，当watcher 是渲染watcher的时候，这个cb就是一个空函数，当是用户watcher的时候，这个cb就是用户传递的回调函数
+    this.id = ++uid // uid for batching //* 唯一标识
+    this.active = true //* 标记watcher是否是活动的watcher
     this.dirty = this.lazy // for lazy watchers
     this.deps = []
     this.newDeps = []
@@ -81,7 +81,9 @@ export default class Watcher {
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
-      this.getter = parsePath(expOrFn)
+      //* expOrFn 是字符串的时候，例如： watch:{'person.name':function(){...}}
+      //* parsePath('person.name') 返回一个函数获取 person.name的值
+      this.getter = parsePath(expOrFn) //* 将获取返回值的函数赋值给getter
       if (!this.getter) {
         this.getter = noop
         process.env.NODE_ENV !== 'production' && warn(
@@ -92,7 +94,10 @@ export default class Watcher {
         )
       }
     }
-    this.value = this.lazy
+    //* lazy属性
+    //* 在渲染watcher中，这个属性是false，会立即执行 getter 方法
+    //* 在计算属性computed watcher 中，lazy是true，延迟获取 value 值操作
+    this.value = this.lazy 
       ? undefined
       : this.get()
   }
@@ -101,10 +106,13 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    pushTarget(this)
+    //* 当前的 Watcher 入栈
+    //* 入栈操作的原因是 存在父子组件的时候，先把父组件的 watcher 入栈，再 push 子组件的 watcher
+    pushTarget(this) 
     let value
     const vm = this.vm
     try {
+      //* 如果 是 渲染 value 的话，这里的getter 就是 updateComponent
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -118,7 +126,7 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
-      popTarget()
+      popTarget() //* 将当前 Target 弹出
       this.cleanupDeps()
     }
     return value
@@ -162,9 +170,11 @@ export default class Watcher {
   /**
    * Subscriber interface.
    * Will be called when a dependency changes.
+   * 依赖更改的时候，将会被执行
    */
   update () {
     /* istanbul ignore else */
+    //* 渲染 watcher 的 lazy 和 sync 属性 都是 false
     if (this.lazy) {
       this.dirty = true
     } else if (this.sync) {
@@ -192,9 +202,9 @@ export default class Watcher {
         // set new value
         const oldValue = this.value
         this.value = value
-        if (this.user) {
+        if (this.user) { //* 用户 watcher 使用 try catch
           try {
-            this.cb.call(this.vm, value, oldValue)
+            this.cb.call(this.vm, value, oldValue) //* call绑定this，传递新值 和 旧值 
           } catch (e) {
             handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }

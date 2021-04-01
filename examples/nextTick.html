@@ -1,0 +1,30 @@
+<!--
+ * @Date: 2021-04-01 16:27:29
+ * @LastEditors: Timothy
+ * @LastEditTime: 2021-04-01 16:30:09
+ * @Description: nextTick
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>nextTick</title>
+</head>
+<body>
+  <script src="../dist/vue.js"></script>
+  <div id="app">
+    <p v-for="_ of list" :key="_">{{_}}</p>
+  </div>
+  <script>
+    const vm = new Vue({
+      el:"#app",
+      data: {
+        list:[1,32,43,54,65,76,6,655],
+      }
+    })
+  </script>
+</body>
+</html>

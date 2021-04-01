@@ -54,7 +54,7 @@ export function initRender (vm: Component) {
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
-
+  //* 实例上的 nextTick
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }

@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-03-24 17:55:36
  * @LastEditors: Timothy
- * @LastEditTime: 2021-03-26 17:00:55
+ * @LastEditTime: 2021-03-29 10:36:44
  * @Description: debug vue 初始化
 -->
 <!DOCTYPE html>
@@ -26,12 +26,22 @@
     const vm = new Vue({
       el: "#app",
       data: {
-        arr: [2, 3, 5]
+        arr: [2, 3, 5],
+        person:1
+      },
+      watch: {
+        'person.name': {
+          handler: (n) => {
+            console.log('debugVueArray-->watch-->', n);
+          },
+          immediate: true
+        }
       }
     })
     // vm.arr.push(8);
     // vm.arr[0] = 100;
     // vm.arr.length = 0;
+
   </script>
 </body>
 

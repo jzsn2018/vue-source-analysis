@@ -8,12 +8,13 @@ import { isIE, isIOS, isNative } from './env'
 const callbacks = []
 let pending = false
 
+//* flushCallbacks 放在 timerFunc中
 function flushCallbacks () {
-  pending = false
-  const copies = callbacks.slice(0)
-  callbacks.length = 0
+  pending = false //* 标记处理结束
+  const copies = callbacks.slice(0) //* 从索引0开始截取到数组的尾部； 就是为了备份数组
+  callbacks.length = 0 //* 清空数组
   for (let i = 0; i < copies.length; i++) {
-    copies[i]()
+    copies[i]() //* 执行数组中存放的回调函数cb
   }
 }
 
@@ -28,6 +29,18 @@ function flushCallbacks () {
 // where microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690, which have workarounds)
 // or even between bubbling of the same event (#6566).
+//在这里，我们使用微任务异步延迟包装器。
+//在2.5中，我们使用了（宏）任务（与微任务结合使用）。
+//但是，当在重新绘制之前更改状态时，它存在一些细微的问题
+//（例如＃6813，由外向内的转换）。
+//此外，在事件处理程序中使用（宏）任务会导致一些奇怪的行为
+//无法规避的代码（例如＃7109，＃7153，＃7546，＃7834，＃8109）。
+//因此，我们现在再次在各处使用微任务。
+//这种折衷的主要缺点是存在一些场景
+//微任务的优先级过高，并且在两者之间触发
+//顺序事件（例如＃4521，＃6690，它们具有解决方法）
+//甚至在同一事件冒泡之间（＃6566）。 
+
 let timerFunc
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
@@ -36,10 +49,20 @@ let timerFunc
 // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
+
+//nextTick行为利用了微任务队列，可以访问它
+//通过本地Promise.then或MutationObserver。
+//MutationObserver拥有更广泛的支持，但是在此方面存在严重错误
+//在触摸事件处理程序中触发时，iOS> = 9.3.3中的UIWebView。它
+//触发几次后完全停止工作...因此，如果是本机的
+//Promise可用，我们将使用它： 
+
 /* istanbul ignore next, $flow-disable-line */
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
+  //* 函数赋值
   timerFunc = () => {
+    //* 微任务
     p.then(flushCallbacks)
     // In problematic UIWebViews, Promise.then doesn't completely break, but
     // it can get stuck in a weird state where callbacks are pushed into the
@@ -67,6 +90,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     textNode.data = String(counter)
   }
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+  //* ie浏览器 nodejs环境
   // Fallback to setImmediate.
   // Techinically it leverages the (macro) task queue,
   // but it is still a better choice than setTimeout.
@@ -80,10 +104,12 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
 }
 
+//* 回调函数 上下文
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
     if (cb) {
+      //* 用户传递的函数会包裹在 try catch 中 防止报错
       try {
         cb.call(ctx)
       } catch (e) {
@@ -94,7 +120,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
     }
   })
   if (!pending) {
-    pending = true
+    pending = true //* 标记正在被处理
     timerFunc()
   }
   // $flow-disable-line

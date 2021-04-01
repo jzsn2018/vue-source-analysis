@@ -1,0 +1,37 @@
+<!--
+ * @Date: 2021-03-30 18:03:32
+ * @LastEditors: Timothy
+ * @LastEditTime: 2021-03-31 15:44:01
+ * @Description: 
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>debug add property</title>
+</head>
+<script src="../dist/vue.js"></script>
+<body>
+  <div id="app">
+    <p>name: {{obj.name}}</p>
+    <p>title: {{obj.title}}</p>
+    <p>arr: {{arr}}</p>
+  </div>
+  <script>
+    const vm = new Vue({
+      el: "#app",
+      data: {
+        arr: [2, 3, 5],
+        obj: {
+          title:"a javascript ui packages",
+        }
+      },
+    });
+
+  </script>
+</body>
+
+</html>
