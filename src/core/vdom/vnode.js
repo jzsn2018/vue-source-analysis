@@ -49,7 +49,7 @@ export default class VNode {
     this.fnContext = undefined
     this.fnOptions = undefined
     this.fnScopeId = undefined
-    this.key = data && data.key
+    this.key = data && data.key //* 通过data(构造函数的第二个参数)传递进来key
     this.componentOptions = componentOptions
     this.componentInstance = undefined
     this.parent = undefined

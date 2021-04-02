@@ -66,13 +66,14 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   }
   return map
 }
-
+//! 函数柯里化
 export function createPatchFunction (backend) {
   let i, j
   const cbs = {}
 
   const { modules, nodeOps } = backend
 
+  //* 将 modules中的hooks存到cbs中
   for (i = 0; i < hooks.length; ++i) {
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {
@@ -121,7 +122,7 @@ export function createPatchFunction (backend) {
   }
 
   let creatingElmInVPre = 0
-
+  //* 创建真实DOM
   function createElm (
     vnode,
     insertedVnodeQueue,
@@ -268,7 +269,7 @@ export function createPatchFunction (backend) {
     // a reactivated keep-alive component doesn't insert itself
     insert(parentElm, vnode.elm, refElm)
   }
-
+  //! 当parent父节点不存在的时候，不会进行插入操作
   function insert (parent, elm, ref) {
     if (isDef(parent)) {
       if (isDef(ref)) {
@@ -696,33 +697,42 @@ export function createPatchFunction (backend) {
       return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
-
+  //! 高阶函数 -- 返回函数 patch 和 snabbdom 中的 init一样也是返回一个patch
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    //* 1. 新的 vnode不存在
     if (isUndef(vnode)) {
+      //* 旧vnode存在，执行 destory 钩子函数
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
     }
 
     let isInitialPatch = false
     const insertedVnodeQueue = []
-
+    //* 2. 旧vnode不存在
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
-      isInitialPatch = true
+      isInitialPatch = true //* 表示 初始化 patch true
       createElm(vnode, insertedVnodeQueue)
     } else {
+      //* 3. 新旧节点都存在
       const isRealElement = isDef(oldVnode.nodeType)
+      //* 4. 不是真实 element，但又是两个相同的vnode
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
+        //* 进行进一步 diff 算法
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
         if (isRealElement) {
+          //* 5. 是真实的DOM元素
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
+          //* SSR_ATTR = data-server-rendered
+          //* nodeType = 1 就是元素 Element
+          // SSR 相关
           if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
             oldVnode.removeAttribute(SSR_ATTR)
-            hydrating = true
+            hydrating = true ;//! 表示 服务端 渲染 
           }
           if (isTrue(hydrating)) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
@@ -740,20 +750,25 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
+          //* 将真实的dom转换成 vnode
           oldVnode = emptyNodeAt(oldVnode)
         }
 
         // replacing existing element
         const oldElm = oldVnode.elm
-        const parentElm = nodeOps.parentNode(oldElm)
+        const parentElm = nodeOps.parentNode(oldElm) //* 寻找父节点
 
         // create new node
+        //* 将新的vnode转换成 dom
         createElm(
           vnode,
           insertedVnodeQueue,
           // extremely rare edge case: do not insert if old element is in a
           // leaving transition. Only happens when combining transition +
           // keep-alive + HOCs. (#4590)
+          //* 非常罕见的边缘情况：如果旧元素位于
+          //* 离开过渡。仅在结合过渡+时发生
+          //* 保持活动+ HOC。 （＃4590）
           oldElm._leaveCb ? null : parentElm,
           nodeOps.nextSibling(oldElm)
         )

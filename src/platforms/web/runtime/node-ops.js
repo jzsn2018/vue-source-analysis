@@ -7,6 +7,7 @@ export function createElement (tagName: string, vnode: VNode): Element {
   if (tagName !== 'select') {
     return elm
   }
+  //* 对 tagName = 'select' 的情况进行特殊操作
   // false or null will remove the attribute but undefined will not
   if (vnode.data && vnode.data.attrs && vnode.data.attrs.multiple !== undefined) {
     elm.setAttribute('multiple', 'multiple')

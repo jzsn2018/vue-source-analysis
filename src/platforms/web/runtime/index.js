@@ -34,7 +34,7 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
-// 判断是否含有全局变量window来判断是否是浏览器环境
+//* 判断是否含有全局变量 window 来判断是否是浏览器环境
 //* inBrowser = typeof window !== 'undefined' 
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 

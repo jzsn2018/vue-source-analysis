@@ -56,6 +56,9 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  //* 判断当前 是 首次渲染 阶段 还是 数据更新 阶段
+  //* 首次渲染 将 vm.$el 和 vnode虚拟 DOM 传递给  vm.__patch__
+  //* 数据更新阶段 将新旧vnode传递给 vm.__patch__
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -66,9 +69,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
+      //* 首次渲染
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
+      //* 数据更新阶段
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()

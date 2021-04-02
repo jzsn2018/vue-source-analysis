@@ -25,7 +25,9 @@ export function simpleNormalizeChildren (children: any) {
 }
 
 // 2. When the children contains constructs that always generated nested Arrays,
+//* 2.当子项包含始嵌套的数组， 例如template标签，v-for或者当children由用户提供的时候
 // e.g. <template>, <slot>, v-for, or when the children is provided by user
+//* 带有手写的渲染功能/JSX。在这种情况下，需要将children 进行统一化
 // with hand-written render functions / JSX. In such cases a full normalization
 // is needed to cater to all possible types of children values.
 export function normalizeChildren (children: any): ?Array<VNode> {
