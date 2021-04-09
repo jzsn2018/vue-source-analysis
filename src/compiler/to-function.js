@@ -8,7 +8,7 @@ type CompiledFunctionResult = {
   render: Function;
   staticRenderFns: Array<Function>;
 };
-
+//* 将字符串形式的代码转换成 函数
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -19,14 +19,14 @@ function createFunction (code, errors) {
 }
 
 export function createCompileToFunctionFn (compile: Function): Function {
-  const cache = Object.create(null)
+  const cache = Object.create(null) //* 创建没有原型的缓存对象
 
   return function compileToFunctions (
     template: string,
     options?: CompilerOptions,
     vm?: Component
   ): CompiledFunctionResult {
-    options = extend({}, options)
+    options = extend({}, options) //* clone 一份 options
     const warn = options.warn || baseWarn
     delete options.warn
 
@@ -49,6 +49,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
+    //* 1. 读取缓存中的 CompilerFunctionResult 对象。如果有直接返回
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -57,9 +58,11 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // compile
+    //* 2. 把模板编译为编译对象 (含有 render,staticRenderFns),字符串形式的js代码
     const compiled = compile(template, options)
 
     // check compilation errors/tips
+    //* 打印在模板编译过程中收集的 errors 和 tips
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
         if (options.outputSourceRange) {
@@ -88,6 +91,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // turn code into functions
+    //* 
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)

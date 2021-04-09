@@ -6,6 +6,10 @@ import { createCompileToFunctionFn } from './to-function'
 
 export function createCompilerCreator (baseCompile: Function): Function {
   return function createCompiler (baseOptions: CompilerOptions) {
+    //* compile 函数
+    //* 合并选项，调用 baseCompile 进行编译
+    //* 输出编译收集到的 error 和 tips 
+    //* 返回编译好 的对象
     function compile (
       template: string,
       options?: CompilerOptions
@@ -17,7 +21,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       let warn = (msg, range, tip) => {
         (tip ? tips : errors).push(msg)
       }
-
+      //* 合并options
       if (options) {
         if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
           // $flow-disable-line
