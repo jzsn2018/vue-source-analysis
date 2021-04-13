@@ -221,7 +221,11 @@ export function createPatchFunction (backend) {
     let i = vnode.data
     if (isDef(i)) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
+      //* i 被重新赋值成 vnode.data.hook 选项中的 init 钩子函数了
+      //* init 预定义的 钩子函数定义在 src\core\vdom\create-component.js -> componentVNodeHooks
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        //* 调用 init() 方法，创建和挂载组件实例
+        //* init() 的过程中创建了 组件的真实 DOM，挂载到 vnode.elm 上
         i(vnode, false /* hydrating */)
       }
       // after calling the init hook, if the vnode is a child component

@@ -1,0 +1,37 @@
+<!--
+ * @Date: 2021-04-12 15:17:44
+ * @LastEditors: Timothy
+ * @LastEditTime: 2021-04-12 15:21:48
+ * @Description: compile
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>compile</title>
+</head>
+<body>
+  <script src="../dist/vue.js"></script>
+  <div id="app">
+    <h1>xxxx <span>xxxxxxx</span></h1>
+    <div>{{msg}} <p>hello</p></div>
+    <div>是否显示</div>
+  </div>
+  <script>
+    const vm = new Vue({
+      el:"#app",
+      data:{
+        msg:"Hello compiler",
+        isShow:false
+      },
+      methods: {
+        handler(){
+          console.log('compiler',Date.now());
+        }
+      },
+    })
+  </script>
+</body>
+</html>

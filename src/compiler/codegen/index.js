@@ -29,8 +29,8 @@ export class CodegenState {
     const isReservedTag = options.isReservedTag || no
     this.maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
     this.onceId = 0
-    this.staticRenderFns = []
-    this.pre = false
+    this.staticRenderFns = [] //* 存放静态根节点
+    this.pre = false //* 当前处理的节点是否使用 v-pre
   }
 }
 

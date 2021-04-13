@@ -38,10 +38,10 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    parent.$children.push(vm) //* 将当前vue实例push到父组件的$children数组中去
+    parent.$children.push(vm) //! 将当前vue实例 push到父组件的 $children 数组中去
   }
 
-  vm.$parent = parent
+  vm.$parent = parent //! 将parent存入 vm.$parent 中
   vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
@@ -63,6 +63,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     const prevEl = vm.$el
     const prevVnode = vm._vnode
+    //! 解决多层组件嵌套的时候，记录父子组件之间的关系
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points

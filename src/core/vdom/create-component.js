@@ -46,7 +46,7 @@ const componentVNodeHooks = {
     } else {
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
-        activeInstance
+        activeInstance //* 当前组件对象的 父组件
       )
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
@@ -96,7 +96,7 @@ const componentVNodeHooks = {
   }
 }
 
-const hooksToMerge = Object.keys(componentVNodeHooks)
+const hooksToMerge = Object.keys(componentVNodeHooks) //* 获取钩子函数名称 ['init','prepatch','insert','destory']
 
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
@@ -109,9 +109,11 @@ export function createComponent (
     return
   }
 
-  const baseCtor = context.$options._base
+  const baseCtor = context.$options._base //* Vue 构造函数
 
   // plain options object: turn it into a constructor
+  //* 如果 Ctor 不是构造函数，而是一个对象
+  //* 使用 Vue.extend() 创造一个子组件的构造函数
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
@@ -126,7 +128,9 @@ export function createComponent (
   }
 
   // async component
+  //* 异步组件
   let asyncFactory
+  //* Ctor.cid 在组件的构造函数中定义的
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
@@ -183,6 +187,8 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  //* 安装组件的钩子函数  init、prepatch、insert、destory
+  //* 准备好 data.hook 钩子函数
   installComponentHooks(data)
 
   // return a placeholder vnode
@@ -210,9 +216,9 @@ export function createComponentInstanceForVnode (
   parent: any, // activeInstance in lifecycle state
 ): Component {
   const options: InternalComponentOptions = {
-    _isComponent: true,
-    _parentVnode: vnode,
-    parent
+    _isComponent: true, //* 标记当前是组件
+    _parentVnode: vnode, //* 当前创建好的vnode对象，占位vnode
+    parent //* activeInstance 当前组件对象的父组件对象
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
@@ -224,17 +230,20 @@ export function createComponentInstanceForVnode (
 }
 
 function installComponentHooks (data: VNodeData) {
-  const hooks = data.hook || (data.hook = {})
+  const hooks = data.hook || (data.hook = {}) //* 获取用户传入的钩子函数
+  //* 用户可以传递自定义的钩子函数
+  //* 把用户传递的自定义钩子函数和 componentVNodeHooks中预定义的钩子函数合并
+  //* hooksToMerge = ['init','prepatch','insert','destory']
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
-    const existing = hooks[key]
-    const toMerge = componentVNodeHooks[key]
+    const existing = hooks[key] //* 获取 用户传递的hooks中指定 key 的 hook
+    const toMerge = componentVNodeHooks[key] //* 获取预定义的钩子函数
     if (existing !== toMerge && !(existing && existing._merged)) {
       hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
     }
   }
 }
-
+//* 返回一个函数（接受两个参数全部传递给钩子函数），函数里面依次执行 预定义钩子函数 和 用户自定义钩子函数
 function mergeHook (f1: any, f2: any): Function {
   const merged = (a, b) => {
     // flow complains about extra args which is why we use any

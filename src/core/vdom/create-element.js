@@ -95,7 +95,7 @@ export function _createElement(
     children.length = 0;
   }
   if (normalizationType === ALWAYS_NORMALIZE) {
-    children = normalizeChildren(children); //* 统一化children
+    children = normalizeChildren(children); //* 统一化 children
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children);
   }
